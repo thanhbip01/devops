@@ -1,35 +1,29 @@
-name: CI/CD - Build & Push Docker Image
+name: Push to GHCR
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       packages: write
+      contents: read
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          username: ${{ github.actor }}          # tự động là thanhbip01
+          password: ${{ secrets.GHCR_TOKEN }}    # chính là token tên thanhbip01
 
-      - name: Build and push frontend
-        run: |
-          cd frontend
-          docker build -t ghcr.io/${{ github.repository }}/web-gara-frontend:latest .
-          docker push ghcr.io/${{ github.repository }}/web-gara-frontend:latest
-
-      - name: Build and push backend (nếu cần)
-        run: |
-          cd backend
-          docker build -t ghcr.io/${{ github.repository }}/web-gara-backend:latest .
-          docker push ghcr.io/${{ github.repository }}/web-gara-backend:latest
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/thanhbip01/ten-image-cua-ban:latest   # thay ten-image-cua-ban thành gì bạn thích
