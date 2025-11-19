@@ -1,25 +1,35 @@
-name: Deploy to Railway
+name: CI/CD - Build & Push Docker Image
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Deploy Frontend
-        run: |
-          docker build ./frontend -t registry.railway.app/${{ secrets.RAILWAY_PROJECT_ID }}/web-gara-frontend
-          docker push registry.railway.app/${{ secrets.RAILWAY_PROJECT_ID }}/web-gara-frontend
-          curl -X POST "https://backboard.railway.app/project/${{ secrets.RAILWAY_PROJECT_ID }}/service/${{ secrets.RAILWAY_FRONTEND_SERVICE_ID }}/deploy" \
-            -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}"
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Deploy Backend
+      - name: Build and push frontend
         run: |
-          docker build ./backend -t registry.railway.app/${{ secrets.RAILWAY_PROJECT_ID }}/web-gara-backend
-          docker push registry.railway.app/${{ secrets.RAILWAY_PROJECT_ID }}/web-gara-backend
-          curl -X POST "https://backboard.railway.app/project/${{ secrets.RAILWAY_PROJECT_ID }}/service/${{ secrets.RAILWAY_BACKEND_SERVICE_ID }}/deploy" \
-            -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}"
+          cd frontend
+          docker build -t ghcr.io/${{ github.repository }}/web-gara-frontend:latest .
+          docker push ghcr.io/${{ github.repository }}/web-gara-frontend:latest
+
+      - name: Build and push backend (nếu cần)
+        run: |
+          cd backend
+          docker build -t ghcr.io/${{ github.repository }}/web-gara-backend:latest .
+          docker push ghcr.io/${{ github.repository }}/web-gara-backend:latest
