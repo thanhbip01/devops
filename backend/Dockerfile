@@ -1,16 +1,18 @@
+# backend/Dockerfile
 FROM node:20-alpine
+
+# Chỉ làm việc trong thư mục backend
 WORKDIR /app
 
-# Copy package trước để tận dụng cache
-COPY package*.json ./
-RUN npm ci --only=production
+# Copy đúng backend thôi, không copy cả project
+COPY backend/package*.json ./
+RUN npm ci --legacy-peer-deps
 
-# Copy code
-COPY . .
+# Copy code backend
+COPY backend/ .
 
+# Expose port
 EXPOSE 5000
-ENV NODE_ENV=production
-ENV PORT=5000
 
+# Start server
 CMD ["node", "server.js"]
-# Nếu file chính của bạn là index.js, app.js, src/index.js → sửa lại ở đây
