@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+    volumes:
+      - ./backend:/app              # ← ĐÃ SỬA: thêm dấu "-"
+      - /app/node_modules           # ← giữ node_modules của container
+    restart: unless-stopped

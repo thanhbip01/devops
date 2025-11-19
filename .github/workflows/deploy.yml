@@ -1,0 +1,27 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Deploy Frontend
+      - name: Deploy Frontend
+        run: |
+          docker build ./frontend -t registry.railway.app/${{ secrets.RAILWAY_PROJECT_ID }}/web-gara-frontend
+          docker push registry.railway.app/${{ secrets.RAILWAY_PROJECT_ID }}/web-gara-frontend
+          curl -X POST "https://backboard.railway.app/project/${{ secrets.RAILWAY_PROJECT_ID }}/service/${{ secrets.RAILWAY_FRONTEND_SERVICE_ID }}/deploy" \
+            -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}"
+
+      # Deploy Backend
+      - name: Deploy Backend
+        run: |
+          docker build ./backend -t registry.railway.app/${{ secrets.RAILWAY_PROJECT_ID }}/web-gara-backend
+          docker push registry.railway.app/${{ secrets.RAILWAY_PROJECT_ID }}/web-gara-backend
+          curl -X POST "https://backboard.railway.app/project/${{ secrets.RAILWAY_PROJECT_ID }}/service/${{ secrets.RAILWAY_BACKEND_SERVICE_ID }}/deploy" \
+            -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}"
