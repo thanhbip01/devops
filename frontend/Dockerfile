@@ -1,20 +1,20 @@
-# frontend/Dockerfile - Phiên bản hoàn hảo cho Vite + Railway 2025
+# frontend/Dockerfile - Phiên bản chuẩn cho Vite/React trên Railway
 FROM node:20-alpine AS builder
 
-# Chuyển vào thư mục /app
+# WORKDIR ở /app
 WORKDIR /app
 
-# Copy package.json và lock file từ thư mục frontend
+# Copy package.json từ thư mục hiện tại (frontend/)
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps --ignore-scripts
+RUN npm ci --legacy-peer-deps
 
-# Copy TOÀN BỘ code từ thư mục frontend (đây là chìa khóa để có index.html)
+# Copy toàn bộ code từ thư mục hiện tại (frontend/)
 COPY . .
 
-# Build production (Vite sẽ tìm thấy index.html)
+# Build
 RUN npm run build
 
-# Serve bằng Nginx (nhẹ và nhanh)
+# Serve bằng Nginx
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 

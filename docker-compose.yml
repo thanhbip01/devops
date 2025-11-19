@@ -1,10 +1,8 @@
-version: "3.9"
-
 services:
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend  # ← Thêm dòng này để context là thư mục frontend/
+      dockerfile: Dockerfile  # Dockerfile trong thư mục frontend/
     ports:
       - "3000:80"
     depends_on:
@@ -15,14 +13,14 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     environment:
       - NODE_ENV=development
       - PORT=5000
     volumes:
-      - ./backend:/app              # ← ĐÃ SỬA: thêm dấu "-"
-      - /app/node_modules           # ← giữ node_modules của container
+      - ./backend:/app
+      - /app/node_modules
     restart: unless-stopped
